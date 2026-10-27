@@ -29,6 +29,8 @@ input[type=range]{width:100%;accent-color:var(--fg)}
 body.clean{background:#000}
 #cfg{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:8;align-items:center;gap:14px;padding:10px 12px 10px 16px;background:rgba(20,20,20,.78);color:#eee;border:1px solid rgba(255,255,255,.18);border-radius:12px;backdrop-filter:blur(8px);width:min(520px,calc(100% - 24px));box-sizing:border-box;cursor:default}
 body.clean:not(.cfgoff) #cfg{display:flex}
+#cfg{flex-wrap:wrap;width:min(640px,calc(100% - 24px))}
+#cfg label:not(.chk){flex:1 1 130px}
 #cfg label{flex:1;color:#ccc}
 #cfg label.chk{flex:none;white-space:nowrap;color:#eee}
 #cfg b{color:#fff}
@@ -57,14 +59,14 @@ select{font:inherit;background:var(--card);color:var(--fg);border:1px solid var(
 <section id="panel"></section>
 <input type="file" id="file" accept="image/*" hidden>
 <input type="file" id="filem" accept="image/*" hidden>
-<div id="cfg"><label><span>Escala de la máscara<b id="msv"></b></span><input type="range" id="ms2" min="0.3" max="2" step="0.01" value="1"></label><label class="chk"><input type="checkbox" id="vm2"> Ver máscara</label><button id="cx" aria-label="Cerrar">✕</button></div>
+<div id="cfg"><label><span>Escala de la máscara<b id="msv"></b></span><input type="range" id="ms2" min="0.3" max="2" step="0.01" value="1"></label><label><span>Posición X<b id="mxv"></b></span><input type="range" id="mx2" min="-0.5" max="0.5" step="0.005" value="0"></label><label><span>Posición Y<b id="myv"></b></span><input type="range" id="my2" min="-0.5" max="0.5" step="0.005" value="0"></label><label class="chk"><input type="checkbox" id="vm2"> Ver máscara</label><button id="cx" aria-label="Cerrar">✕</button></div>
 <button id="ex" aria-label="Salir"></button>
 <script>
 (function(){
 var cv=document.getElementById('c'),stage=document.getElementById('stage');
 var gl=cv.getContext('webgl');
 if(!gl){stage.innerHTML='<div id="err">Tu navegador no soporta WebGL.</div>';return;}
-var P={strength:1.2,damp:.985,radius:6,ms:1,spec:.8,chroma:.5,auto:true};
+var P={strength:1.2,damp:.985,radius:6,ms:1,mx:0,my:0,spec:.8,chroma:.5,auto:true};
 var CFG=[['strength','Intensidad',0,3,.05],['damp','Persistencia',.95,.997,.001],['radius','Radio',2,14,1],['spec','Brillo',0,2,.05],['chroma','Aberración',0,1.5,.05]];
 var panel=document.getElementById('panel');
 CFG.forEach(function(c){
@@ -81,6 +83,7 @@ panel.appendChild(cl);
 var fl=document.createElement('label');fl.innerHTML='<span>Ajuste de máscara</span><select id="mf"><option value="contain">Centrada</option><option value="stretch">Estirada</option></select>';panel.appendChild(fl);
 var vl=document.createElement('label');vl.className='chk';vl.innerHTML='<input type="checkbox" id="vm"> Ver máscara';panel.appendChild(vl);
 var sl=document.createElement('label');sl.innerHTML='<span>Escala de la máscara<b id="msv1"></b></span><input type="range" id="ms1" min="0.3" max="2" step="0.01" value="1">';panel.appendChild(sl);
+[['mx','Posición X'],['my','Posición Y']].forEach(function(a){var l=document.createElement('label');l.innerHTML='<span>'+a[1]+'<b id="'+a[0]+'v1"></b></span><input type="range" id="'+a[0]+'1" min="-0.5" max="0.5" step="0.005" value="0">';panel.appendChild(l);});
 
 function sh(t,s){var o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);return o;}
 var vs='attribute vec2 p;varying vec2 uv;void main(){uv=p*.5+.5;gl_Position=vec4(p,0.,1.);}';
@@ -126,7 +129,7 @@ function buildWall(){
     x.fillStyle='#fff';x.fillRect(0,0,gw,gh);
     var sw=maskSrc.width,sh=maskSrc.height,dx=0,dy=0,dw=gw,dh=gh;
     if(document.getElementById('mf').value==='contain'){var k=Math.min(gw/sw,gh/sh);dw=sw*k;dh=sh*k;dx=(gw-dw)/2;dy=(gh-dh)/2;}
-    dw*=P.ms;dh*=P.ms;dx=(gw-dw)/2;dy=(gh-dh)/2;x.drawImage(maskSrc,dx,dy,dw,dh);
+    dw*=P.ms;dh*=P.ms;dx=(gw-dw)/2+P.mx*gw;dy=(gh-dh)/2+P.my*gh;x.drawImage(maskSrc,dx,dy,dw,dh);
     var d=x.getImageData(0,0,gw,gh).data;
     for(var i=0;i<wall.length;i++){wall[i]=d[i*4]<128?1:0;if(wall[i]){cur[i]=0;prev[i]=0;}}
   }
@@ -247,7 +250,9 @@ function setVm(on){ov.style.display=on?'block':'none';document.getElementById('v
 document.getElementById('vm').addEventListener('change',function(e){setVm(e.target.checked);});
 document.getElementById('vm2').addEventListener('change',function(e){setVm(e.target.checked);});
 document.getElementById('cx').addEventListener('click',function(){document.body.classList.add('cfgoff');setVm(false);});
-demo();setMs(1);requestAnimationFrame(frame);
+function setP(k,v){P[k]=v;[k+'1',k+'2'].forEach(function(id){document.getElementById(id).value=v;});var t=(v>0?'+':'')+Math.round(v*100)+'%';document.getElementById(k+'v1').textContent=t;document.getElementById(k+'v').textContent=t;buildWall();}
+['mx','my'].forEach(function(k){[k+'1',k+'2'].forEach(function(id){document.getElementById(id).addEventListener('input',function(e){setP(k,parseFloat(e.target.value));});});});
+demo();setMs(1);setP('mx',0);setP('my',0);requestAnimationFrame(frame);
 })();
 </script>
 </body>
