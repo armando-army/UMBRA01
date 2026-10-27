@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Liquid Ripple</title>
+<title>Umbral 01 / Armando Frezze Durand</title>
 <style>
 :root{--bg:#f4f4f2;--fg:#151515;--mut:#6b6b68;--card:#fff;--line:#d9d9d4;--acc:#151515;--accfg:#fff;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -27,9 +27,13 @@ input[type=range]{width:100%;accent-color:var(--fg)}
 .chk{flex-direction:row;align-items:center;gap:8px;color:var(--fg);font-size:13px}
 #err{padding:24px}
 body.clean{background:#000}
-#cfg{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:8;align-items:center;gap:14px;padding:10px 12px 10px 16px;background:rgba(20,20,20,.78);color:#eee;border:1px solid rgba(255,255,255,.18);border-radius:12px;backdrop-filter:blur(8px);width:min(520px,calc(100% - 24px));box-sizing:border-box;cursor:default}
+#dock{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:8;flex-direction:column;align-items:center;gap:10px;width:min(640px,calc(100% - 24px));pointer-events:none}
+body.clean #dock{display:flex}
+#dock>#cfg{pointer-events:auto}
+#sig{font-size:11px;letter-spacing:.16em;color:rgba(255,255,255,.38);text-shadow:0 1px 3px rgba(0,0,0,.6);align-self:flex-start;text-align:left;user-select:none}
+#cfg{display:none;align-items:center;gap:14px;padding:10px 12px 10px 16px;background:rgba(20,20,20,.78);color:#eee;border:1px solid rgba(255,255,255,.18);border-radius:12px;backdrop-filter:blur(8px);width:min(520px,calc(100% - 24px));box-sizing:border-box;cursor:default}
 body.clean:not(.cfgoff) #cfg{display:flex}
-#cfg{flex-wrap:wrap;width:min(640px,calc(100% - 24px))}
+#cfg{flex-wrap:wrap;width:100%}
 #cfg label:not(.chk){flex:1 1 130px}
 #mod{display:none;position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.55);align-items:center;justify-content:center}
 #mod.on{display:flex}
@@ -54,7 +58,7 @@ select{font:inherit;background:var(--card);color:var(--fg);border:1px solid var(
 </head>
 <body>
 <header>
-  <h1>Liquid Ripple Vision</h1>
+  <h1>Umbral 01 / Armando Frezze Durand</h1>
   <div class="btns">
     <button class="p" id="up">Subir imagen</button>
     <button id="um">Subir máscara</button>
@@ -68,7 +72,8 @@ select{font:inherit;background:var(--card);color:var(--fg);border:1px solid var(
 <input type="file" id="file" accept="image/*" hidden>
 <input type="file" id="filem" accept="image/*" hidden>
 <div id="mod"><div class="box"><h2>Elegí una cámara</h2><select id="camsel"></select><p id="cammsg"></p><div class="row"><button id="camcancel">Cancelar</button><button id="camok" class="p">Iniciar</button></div></div></div>
-<div id="cfg"><label><span>Escala de la máscara<b id="msv"></b></span><input type="range" id="ms2" min="0.3" max="2" step="0.01" value="1"></label><label><span>Posición X<b id="mxv"></b></span><input type="range" id="mx2" min="-0.5" max="0.5" step="0.005" value="0"></label><label><span>Posición Y<b id="myv"></b></span><input type="range" id="my2" min="-0.5" max="0.5" step="0.005" value="0"></label><label class="chk"><input type="checkbox" id="vm2"> Ver máscara</label><button id="cx" aria-label="Cerrar">✕</button></div>
+<div id="dock"><div id="sig">Umbral 01 / Armando Frezze Durand</div>
+<div id="cfg"><label><span>Escala de la máscara<b id="msv"></b></span><input type="range" id="ms2" min="0.3" max="2" step="0.01" value="1"></label><label><span>Posición X<b id="mxv"></b></span><input type="range" id="mx2" min="-0.5" max="0.5" step="0.005" value="0"></label><label><span>Posición Y<b id="myv"></b></span><input type="range" id="my2" min="-0.5" max="0.5" step="0.005" value="0"></label><label class="chk"><input type="checkbox" id="vm2"> Ver máscara</label><button id="cx" aria-label="Cerrar">✕</button></div></div>
 <button id="ex" aria-label="Salir"></button>
 <script>
 (function(){
